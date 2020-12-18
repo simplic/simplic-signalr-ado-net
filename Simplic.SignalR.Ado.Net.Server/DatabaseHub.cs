@@ -122,96 +122,209 @@ namespace Simplic.SignalR.Ado.Net.Server
         }
         #endregion
 
-        public async Task<Guid> CreateCommandAsync()
+        /// <summary>
+        /// Tries to find a command in a cached db-connection
+        /// </summary>
+        /// <param name="dbConnectionCache">Connection cache instance</param>
+        /// <param name="id">Unique command id</param>
+        /// <param name="command">Command instance if found</param>
+        /// <returns></returns>
+        private bool TryGetCommand(DbConnectionCache dbConnectionCache, Guid id, out DbCommand command)
         {
-            var id = Guid.NewGuid();
-
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            // For security reason, we do not allow empty guids
+            if (id == Guid.Empty)
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.DbConnection.CreateCommand();
-
-                connection.Commands[id] = command;
+                command = null;
+                return false;
             }
 
-            return id;
-        }
-
-        public async Task DisposeCommandAsync(Guid id)
-        {
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            if (dbConnectionCache.Commands.ContainsKey(id))
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.Commands[id];
-                command?.Dispose();
-
-                connection.Commands.Remove(id);
+                command = dbConnectionCache.Commands[id];
+                return true;
             }
+
+            command = null;
+            return false;
         }
 
-        public async Task UpdateCommandAsync(CommandModel model)
+        public async Task<ResponseObject<Guid>> CreateCommandAsync()
         {
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            try
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.Commands[model.Id];
+                var id = Guid.NewGuid();
 
-                // Assert
-                if (model.TransactionId != null && model.TransactionId != Guid.Empty)
-                    command.Transaction = connection.Transactions[model.TransactionId.Value];
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    var command = connection.DbConnection.CreateCommand();
+                    connection.Commands[id] = command;
+                }
+                else
+                    return GetConnectionNotFoundReponse<Guid>();
 
-                command.CommandText = model.CommandText;
+                return GetSuccessReponse(id);
             }
-        }
-
-        public async Task PrepareCommandAsync(CommandModel model)
-        {
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            catch (Exception ex)
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.Commands[model.Id];
-                command.Prepare();
+                return new ResponseObject<Guid> { Exception = ex.Message, Success = false };
             }
         }
 
-        public async Task CancelCommandAsync(CommandModel model)
+        public async Task<Response> DisposeCommandAsync(Guid id)
         {
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            try
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.Commands[model.Id];
-                command.Cancel();
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, id, out DbCommand command))
+                    {
+                        command.Dispose();
+                        connection.Commands.Remove(id);
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse(id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse<Guid>();
+
+                return GetSuccessReponse(id);
+            }
+            catch (Exception ex)
+            {
+                return new Response { Exception = ex.Message, Success = false };
             }
         }
 
-        public async Task<int> ExecuteNonQueryAsync(Guid id)
+        public async Task<Response> UpdateCommandAsync(CommandModel model)
         {
-            // TODO: Assert connection
-
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            try
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.Commands[id];
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, model.Id, out DbCommand command))
+                    {
+                        // Assert
+                        if (model.TransactionId != null && model.TransactionId != Guid.Empty)
+                            command.Transaction = connection.Transactions[model.TransactionId.Value];
 
-                return await command.ExecuteNonQueryAsync();
+                        command.CommandText = model.CommandText;
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse(model.Id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse();
+
+                return GetSuccessReponse();
             }
-
-            return -12;
+            catch (Exception ex)
+            {
+                return new Response { Exception = ex.Message, Success = false };
+            }
         }
 
-        public async Task<object> ExecuteScalarAsync(Guid id)
+        public async Task<Response> PrepareCommandAsync(CommandModel model)
         {
-            // TODO: Assert connection
-
-            if (dbConnections.ContainsKey(Context.ConnectionId))
+            try
             {
-                var connection = dbConnections[Context.ConnectionId];
-                var command = connection.Commands[id];
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, model.Id, out DbCommand command))
+                    {
+                        command.Prepare();
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse(model.Id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse();
 
-                return await command.ExecuteScalarAsync();
+                return GetSuccessReponse();
             }
+            catch (Exception ex)
+            {
+                return new Response { Exception = ex.Message, Success = false };
+            }
+        }
 
-            return null;
+        public async Task<Response> CancelCommandAsync(CommandModel model)
+        {
+            try
+            {
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, model.Id, out DbCommand command))
+                    {
+                        command.Cancel();
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse(model.Id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse();
+
+                return GetSuccessReponse();
+            }
+            catch (Exception ex)
+            {
+                return new Response { Exception = ex.Message, Success = false };
+            }
+        }
+
+        public async Task<ResponseObject<int>> ExecuteNonQueryAsync(Guid id)
+        {
+            try
+            {
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, id, out DbCommand command))
+                    {
+                        return GetSuccessReponse(await command.ExecuteNonQueryAsync());
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse<int>(id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse<int>();
+            }
+            catch (Exception ex)
+            {
+                return new ResponseObject<int> { Exception = ex.Message, Success = false };
+            }
+        }
+
+        public async Task<ResponseObject<object>> ExecuteScalarAsync(Guid id)
+        {
+            try
+            {
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, id, out DbCommand command))
+                    {
+                        return GetSuccessReponse(await command.ExecuteScalarAsync());
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse<object>(id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse<object>();
+            }
+            catch (Exception ex)
+            {
+                return new ResponseObject<object> { Exception = ex.Message, Success = false };
+            }
         }
 
         public override Task OnDisconnectedAsync(Exception exception)
@@ -236,5 +349,87 @@ namespace Simplic.SignalR.Ado.Net.Server
 
             return base.OnDisconnectedAsync(exception);
         }
+
+
+        #region Connection cache
+        /// <summary>
+        /// Tries to find a cached database connection by the SingalR connection id
+        /// </summary>
+        /// <param name="dbConnectionCache">Returns the connection if found</param>
+        /// <returns>True if the connection was found, in any other case false</returns>
+        private bool TryGetConnection(out DbConnectionCache dbConnectionCache)
+        {
+            if (dbConnections.ContainsKey(Context.ConnectionId))
+            {
+                dbConnectionCache = dbConnections[Context.ConnectionId];
+                return true;
+            }
+
+            dbConnectionCache = null;
+            return false;
+        }
+        #endregion
+
+        #region Reponse
+        /// <summary>
+        /// Creates a connection not found response
+        /// </summary>
+        /// <returns>Reponse with success false</returns>
+        private Response GetConnectionNotFoundReponse()
+        {
+            return new Response { Exception = $"Could not find connection {Context.ConnectionId}", Success = false };
+        }
+
+
+        /// <summary>
+        /// Creates a generic connection not found response
+        /// </summary>
+        /// <returns>Reponse with success false</returns>
+        private ResponseObject<T> GetConnectionNotFoundReponse<T>()
+        {
+            return new ResponseObject<T> { Exception = $"Could not find connection {Context.ConnectionId}", Success = false };
+        }
+
+        /// <summary>
+        /// Creates a command not found response
+        /// </summary>
+        /// <param name="commandId">Unique command id</param>
+        /// <returns>Reponse with success false</returns>
+        private Response GetCommandNotFoundReponse(Guid commandId)
+        {
+            return new Response { Exception = $"Could not find command {Context.ConnectionId}/{commandId}", Success = false };
+        }
+
+
+        /// <summary>
+        /// Creates a generic command not found response
+        /// </summary>
+        /// <param name="commandId">Unique command id</param>
+        /// <returns>Reponse with success false</returns>
+        private ResponseObject<T> GetCommandNotFoundReponse<T>(Guid commandId)
+        {
+            return new ResponseObject<T> { Exception = $"Could not find connection {Context.ConnectionId}/{commandId}", Success = false };
+        }
+
+        /// <summary>
+        /// Creates a success response
+        /// </summary>
+        /// <returns>Reponse with success true</returns>
+        private Response GetSuccessReponse()
+        {
+            return new Response { Success = true, Exception = "" };
+        }
+
+
+        /// <summary>
+        /// Creates a generic success response
+        /// </summary>
+        /// <param name="obj">Object to pass to the client</param>
+        /// <returns>Reponse with success true</returns>
+        private ResponseObject<T> GetSuccessReponse<T>(T obj)
+        {
+            return new ResponseObject<T> { Success = true, Exception = "", Object = obj };
+        }
+        #endregion
     }
 }

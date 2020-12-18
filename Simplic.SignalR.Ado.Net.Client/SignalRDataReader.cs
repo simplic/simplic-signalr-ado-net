@@ -7,18 +7,6 @@ namespace Simplic.SignalR.Ado.Net.Client
 {
     public class SignalRDataReader : IDataReader
     {
-        public object this[int i] => throw new NotImplementedException();
-
-        public object this[string name] => throw new NotImplementedException();
-
-        public int Depth => throw new NotImplementedException();
-
-        public bool IsClosed => throw new NotImplementedException();
-
-        public int RecordsAffected => throw new NotImplementedException();
-
-        public int FieldCount => throw new NotImplementedException();
-
         public void Close()
         {
             throw new NotImplementedException();
@@ -153,5 +141,17 @@ namespace Simplic.SignalR.Ado.Net.Client
         {
             throw new NotImplementedException();
         }
+
+        public object this[int i] => throw new NotImplementedException();
+
+        public object this[string name] => throw new NotImplementedException();
+
+        public int Depth => throw new NotImplementedException();
+
+        public bool IsClosed => throw new NotImplementedException();
+
+        public int RecordsAffected => throw new NotImplementedException();
+
+        public int FieldCount => throw new NotImplementedException();
     }
 }

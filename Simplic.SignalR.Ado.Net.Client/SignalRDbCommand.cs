@@ -44,12 +44,22 @@ namespace Simplic.SignalR.Ado.Net.Client
             Transaction = dbTransaction;
         }
 
+        private void AssertResponse(Response response)
+        {
+            if (response?.Success == false)
+                throw new Exception(response.Exception);
+        }
+
         public override int ExecuteNonQuery()
         {
             Assert();
             CreateOrUpdate();
 
-            return dbConnection.HubConnectionBuilder.InvokeAsync<int>("ExecuteNonQueryAsync", Id).Result;
+            var response = dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<int>>("ExecuteNonQueryAsync", Id).Result;
+
+            AssertResponse(response);
+
+            return response.Object;
         }
 
         public override object ExecuteScalar()
@@ -57,19 +67,20 @@ namespace Simplic.SignalR.Ado.Net.Client
             Assert();
             CreateOrUpdate();
 
-            var result = dbConnection.HubConnectionBuilder.InvokeAsync<object>("ExecuteScalarAsync", Id).Result;
+            var response = dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<object>>("ExecuteScalarAsync", Id).Result;
 
-            if (result is JsonElement element)
+            AssertResponse(response);
+
+            if (response.Object is JsonElement element)
             {
                 // TODO: Support all types
                 if (element.ValueKind == JsonValueKind.Number)
                     return element.GetInt32();
                 if (element.ValueKind == JsonValueKind.String)
                     return element.GetString();
-
             }
 
-            return null;
+            return response.Object;
         }
 
         public override void Prepare()
@@ -77,7 +88,8 @@ namespace Simplic.SignalR.Ado.Net.Client
             Assert();
             CreateOrUpdate();
 
-            dbConnection.HubConnectionBuilder.InvokeAsync("PrepareCommandAsync").Wait();
+            var response = dbConnection.HubConnectionBuilder.InvokeAsync<Response>("PrepareCommandAsync").Result;
+            AssertResponse(response);
         }
 
         public override void Cancel()
@@ -85,7 +97,8 @@ namespace Simplic.SignalR.Ado.Net.Client
             Assert();
             CreateOrUpdate();
 
-            dbConnection.HubConnectionBuilder.InvokeAsync("CancelCommandAsync").Wait();
+            var response = dbConnection.HubConnectionBuilder.InvokeAsync<Response>("CancelCommandAsync").Result;
+            AssertResponse(response);
         }
 
         protected override DbParameter CreateDbParameter()
@@ -152,14 +165,19 @@ namespace Simplic.SignalR.Ado.Net.Client
             if (Id == Guid.Empty)
             {
                 // Create command
-                Id = dbConnection.HubConnectionBuilder.InvokeAsync<Guid>("CreateCommandAsync").Result;
+                var idResponse = dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<Guid>>("CreateCommandAsync").Result;
+                AssertResponse(idResponse);
 
-                dbConnection.HubConnectionBuilder.InvokeAsync("UpdateCommandAsync", GetModel()).Wait();
+                Id = idResponse.Object;
+
+                var response = dbConnection.HubConnectionBuilder.InvokeAsync<Response>("UpdateCommandAsync", GetModel()).Result;
+                AssertResponse(response);
             }
             else if (isDirty)
             {
                 // Update command
-                dbConnection.HubConnectionBuilder.InvokeAsync("UpdateCommandAsync", GetModel()).Wait();
+                var response = dbConnection.HubConnectionBuilder.InvokeAsync<Response>("UpdateCommandAsync", GetModel()).Result;
+                AssertResponse(response);
             }
 
             isDirty = false;

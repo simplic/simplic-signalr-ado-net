@@ -6,11 +6,13 @@
     <SharedGUID>41472a19-c6ee-4cb8-b3d7-755156b356a3</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>Simplic.SignalR.Ado.Net.Client.Shared</Import_RootNamespace>
+    <Import_RootNamespace>Simplic.SignalR.Ado.Net</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)CommandModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpenConnectionRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpenConnectionResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ResponseObject.cs" />
+    <Compile Include="..\Simplic.SignalR.Ado.Net.Shared\Response.cs" />
   </ItemGroup>
 </Project>
