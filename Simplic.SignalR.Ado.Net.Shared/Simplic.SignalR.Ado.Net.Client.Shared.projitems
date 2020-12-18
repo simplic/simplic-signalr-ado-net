@@ -9,10 +9,15 @@
     <Import_RootNamespace>Simplic.SignalR.Ado.Net</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)CommandModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)OpenConnectionRequest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)OpenConnectionResponse.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ResponseObject.cs" />
-    <Compile Include="..\Simplic.SignalR.Ado.Net.Shared\Response.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Command\CommandModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Connection\OpenConnectionRequest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Connection\OpenConnectionResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)General\ResponseObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)General\Response.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="$(MSBuildThisFileDirectory)Command\" />
+    <Folder Include="$(MSBuildThisFileDirectory)Connection\" />
+    <Folder Include="$(MSBuildThisFileDirectory)General\" />
   </ItemGroup>
 </Project>

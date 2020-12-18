@@ -1,125 +1,152 @@
 ﻿<!DOCTYPE HTML>
 <html>
 <head>
-<meta charset="utf-8">
-<title>304 - Not Modified – jeznet.org</title>
-<style>
+    <meta charset="utf-8">
+    <title>304 - Not Modified – jeznet.org</title>
+    <style>
 
-@import url(http://fonts.googleapis.com/css?family=Bree+Serif|Source+Sans+Pro:300,400);
+        @import url(http://fonts.googleapis.com/css?family=Bree+Serif|Source+Sans+Pro:300,400);
 
-*{
-	maring: 0;
-	padding: 0;
-}
-body{
-	font-family: 'Source Sans Pro', sans-serif;
-	background: #3f6eb3;
-	color: #1f3759;
-}
-a:link{
-	color: #1f3759;
-	text-decoration: none;
-}
-a:active{
-	color: #1f3759;
-	text-decoration: none;
-}
-a:hover{
-	color: #9fb7d9;
-	text-decoration: none;
-}
-a:visited{
-	color: #1f3759;
-	text-decoration: none;
-}
+        * {
+            maring: 0;
+            padding: 0;
+        }
 
-a.underline, .underline{
-	text-decoration: underline;
-}
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: #3f6eb3;
+            color: #1f3759;
+        }
 
-.bree-font{
-	font-family: 'Bree Serif', serif;
-}
+        a:link {
+            color: #1f3759;
+            text-decoration: none;
+        }
 
-#content{
-	margin: 0 auto;
-	width: 960px;
-}
+        a:active {
+            color: #1f3759;
+            text-decoration: none;
+        }
 
-.clearfix:after {
-	content: ".";
-	display: block;
-	clear: both;
-	visibility: hidden;
-	line-height: 0;
-	height: 0;
-}
- 
-.clearfix {
-	display: block;
-}
+        a:hover {
+            color: #9fb7d9;
+            text-decoration: none;
+        }
 
-#logo {
-	margin: 1em;
-	float: left;
-	display: block;
-}
-nav{
-	float: right;
-	display: block;
-}
-nav ul > li{
-	list-style: none;
-	float: left;
-	margin: 0 2em;
-	display: block;
-}
+        a:visited {
+            color: #1f3759;
+            text-decoration: none;
+        }
 
-#main-body{
-	text-align: center;
-}
+        a.underline, .underline {
+            text-decoration: underline;
+        }
 
-.enormous-font{
-	font-size: 10em;
-	margin-bottom: 0em;
-	margin-top: 60px;
-}
-.big-font{
-	font-size: 2em;
-}
-hr{
-	width: 25%;
-	height: 1px;
-	background: #1f3759;
-	border: 0px;
-}
+        .bree-font {
+            font-family: 'Bree Serif', serif;
+        }
 
+        #content {
+            margin: 0 auto;
+            width: 960px;
+        }
 
+        .clearfix:after {
+            content: ".";
+            display: block;
+            clear: both;
+            visibility: hidden;
+            line-height: 0;
+            height: 0;
+        }
 
-</style>
+        .clearfix {
+            display: block;
+        }
+
+        #logo {
+            margin: 1em;
+            float: left;
+            display: block;
+        }
+
+        nav {
+            float: right;
+            display: block;
+        }
+
+            nav ul > li {
+                list-style: none;
+                float: left;
+                margin: 0 2em;
+                display: block;
+            }
+
+        #main-body {
+            text-align: center;
+        }
+
+        .enormous-font {
+            font-size: 4em;
+            margin-bottom: 0em;
+            margin-top: 60px;
+        }
+
+        .big-font {
+            font-size: 1.4em;
+        }
+
+        .small-font {
+            font-size: 1em;
+        }
+
+        hr {
+            width: 25%;
+            height: 1px;
+            background: #1f3759;
+            border: 0px;
+        }
+
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <div id="content">
-    	<header>
+        <header>
             <div id="logo">
-            	<a href="#"></a>
+                <a href="#"></a>
             </div>
             <nav>
-            	<ul>
-                    <li><a href="https://www.simplic.biy">SIMPLIC GmbH</a></li>
+                <ul>
+                    <li><a href="https://www.simplic.biz">SIMPLIC GmbH</a></li>
                 </ul>
             </nav>
         </header>
-        
+
         <div class="clearfix"></div>
-        
-		<div id="main-body">
-			<p class="enormous-font bree-font"> UP! </p>
-			<hr>
-			<p class="big-font"> Resource has not been modified. </p>
-			<hr>
-			<p class="big-font"> Let’s safely return to the <a href="http://www.jeznet.org" class="underline">home page</a></p>
-		</div>
+
+        <div id="main-body">
+            <p class="enormous-font bree-font"> Status: available </p>
+            <hr>
+            <p class="big-font">Database: simplic</p>
+            <p class="small-font">Connected clients: {client_count}</p>
+            <p class="small-font">Average query time: 512ms</p>
+            <p class="small-font">Query count: {query_count}</p>
+            <p class="small-font">Slowest queries [top 10]: not authenticated</p>
+            <p class="small-font">DB-Connections: not authenticated</p>
+            <hr>
+        </div>
+
+        <div class="clearfix"></div>
+        <footer class="footer">
+            <p class="small-font"> Created and copyright (&copy;) by <a href="https://www.simplic.biz" class="underline">SIMPLIC GmbH</a></p>
+        </footer>
     </div>
 </body>
 </html>

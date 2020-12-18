@@ -11,6 +11,8 @@ namespace Simplic.SignalR.Ado.Net.Server
     public class DatabaseHub : Hub
     {
         private static IDictionary<string, DbConnectionCache> dbConnections = new Dictionary<string, DbConnectionCache>();
+        public static HashSet<string> ConnectedIds = new HashSet<string>();
+        public static volatile int QueryCounter = 0;
 
         #region [OpenAsync]
         public async Task<OpenConnectionResponse> OpenAsync(OpenConnectionRequest model)
@@ -137,7 +139,7 @@ namespace Simplic.SignalR.Ado.Net.Server
                 command = null;
                 return false;
             }
-
+            
             if (dbConnectionCache.Commands.ContainsKey(id))
             {
                 command = dbConnectionCache.Commands[id];
@@ -235,6 +237,7 @@ namespace Simplic.SignalR.Ado.Net.Server
                 {
                     if (TryGetCommand(connection, model.Id, out DbCommand command))
                     {
+                        QueryCounter++;
                         command.Prepare();
                     }
                     else
@@ -261,6 +264,7 @@ namespace Simplic.SignalR.Ado.Net.Server
                 {
                     if (TryGetCommand(connection, model.Id, out DbCommand command))
                     {
+                        QueryCounter++;
                         command.Cancel();
                     }
                     else
@@ -287,6 +291,7 @@ namespace Simplic.SignalR.Ado.Net.Server
                 {
                     if (TryGetCommand(connection, id, out DbCommand command))
                     {
+                        QueryCounter++;
                         return GetSuccessReponse(await command.ExecuteNonQueryAsync());
                     }
                     else
@@ -311,6 +316,7 @@ namespace Simplic.SignalR.Ado.Net.Server
                 {
                     if (TryGetCommand(connection, id, out DbCommand command))
                     {
+                        QueryCounter++;
                         return GetSuccessReponse(await command.ExecuteScalarAsync());
                     }
                     else
@@ -327,8 +333,16 @@ namespace Simplic.SignalR.Ado.Net.Server
             }
         }
 
+        public override Task OnConnectedAsync()
+        {
+            ConnectedIds.Add(Context.ConnectionId);
+            return base.OnConnectedAsync();
+        }
+
         public override Task OnDisconnectedAsync(Exception exception)
         {
+            ConnectedIds.Remove(Context.ConnectionId);
+
             if (dbConnections.ContainsKey(Context.ConnectionId))
             {
                 try

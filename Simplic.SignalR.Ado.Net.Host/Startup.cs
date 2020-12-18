@@ -53,6 +53,9 @@ namespace Simplic.SignalR.Ado.Net.Host
 
                     var text = Encoding.UTF8.GetString(stream.ToArray());
 
+                    text = text.Replace("{client_count}", DatabaseHub.ConnectedIds.Count.ToString());
+                    text = text.Replace("{query_count}", DatabaseHub.QueryCounter.ToString());
+
                     context.Response.ContentType = "text/html";
                     return context.Response.WriteAsync(text);
                 }

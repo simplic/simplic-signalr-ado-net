@@ -10,7 +10,7 @@ namespace Simplic.SignalR.Ado.Net.CLI
             using (var connection = new SignalRDbConnection())
             {
                 System.Threading.Thread.Sleep(2000);
-                connection.ConnectionString = "{driver=Sap.Data.SQLAnywhere;url=http://localhost:5000/};UID=admin;PWD=school;Server=setup;dbn=simplic;ASTART=No;links=tcpip";
+                connection.ConnectionString = "{driver=Sap.Data.SQLAnywhere;url=http://localhost:5000/;configuration=simplic-test};UID=admin;PWD=school;";
 
                 connection.Open();
 
@@ -31,6 +31,12 @@ namespace Simplic.SignalR.Ado.Net.CLI
                     var integer = command.ExecuteScalar();
 
                     Console.WriteLine($"User-Count {integer}; {command.CommandText}");
+
+                    for (int k = 0; k < 100; k++)
+                    {
+                        command.CommandText = "select * from it_document";
+                        command.ExecuteScalar();
+                    }
 
                     while (true)
                     {

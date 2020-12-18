@@ -28,4 +28,10 @@
     <ProjectReference Include="..\Simplic.SignalR.Ado.Net.Server\Simplic.SignalR.Ado.Net.Server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="configuration.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

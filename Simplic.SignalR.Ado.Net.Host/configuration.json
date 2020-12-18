@@ -1,0 +1,14 @@
+{
+  "port": 5000,
+  "configurations": [
+    {
+      "database": "simplic-test",
+      "connectionString": "Server=setup;dbn=simplic;ASTART=No;links=tcpip",
+      "metricKey": "4c59c4a0-390a-4c5f-afc8-1b2a03ef65f2",
+      "metrics": {
+        "connectionCount": true,
+        "queryCount": true
+      }
+    }
+  ]
+}
