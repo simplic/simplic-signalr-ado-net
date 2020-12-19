@@ -4,6 +4,8 @@ using System.Data;
 using System.Data.Common;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Simplic.SignalR.Ado.Net.Client
 {
@@ -62,12 +64,45 @@ namespace Simplic.SignalR.Ado.Net.Client
             return response.Object;
         }
 
+        public override async Task<int> ExecuteNonQueryAsync(CancellationToken cancellationToken)
+        {
+            Assert();
+            CreateOrUpdate();
+
+            var response = await dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<int>>("ExecuteNonQueryAsync", Id, cancellationToken);
+
+            AssertResponse(response);
+
+            return response.Object;
+        }
+
         public override object ExecuteScalar()
         {
             Assert();
             CreateOrUpdate();
 
             var response = dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<object>>("ExecuteScalarAsync", Id).Result;
+
+            AssertResponse(response);
+
+            if (response.Object is JsonElement element)
+            {
+                // TODO: Support all types
+                if (element.ValueKind == JsonValueKind.Number)
+                    return element.GetInt32();
+                if (element.ValueKind == JsonValueKind.String)
+                    return element.GetString();
+            }
+
+            return response.Object;
+        }
+
+        public override async Task<object> ExecuteScalarAsync(CancellationToken cancellationToken)
+        {
+            Assert();
+            CreateOrUpdate();
+
+            var response = await dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<object>>("ExecuteScalarAsync", Id, cancellationToken);
 
             AssertResponse(response);
 
@@ -119,12 +154,17 @@ namespace Simplic.SignalR.Ado.Net.Client
             Assert();
             CreateOrUpdate();
 
-            throw new NotImplementedException();
+            var response = dbConnection.HubConnectionBuilder.InvokeAsync<ResponseObject<OpenDataReaderResponse>>("ExecuteDbDataReaderAsync", Id).Result;
+
+            AssertResponse(response);
+
+            return new SignalRDataReader(response.Object, this);
         }
 
         protected override void Dispose(bool disposing)
         {
-            // dbConnection.HubConnectionBuilder.InvokeAsync<int>("DisposeCommandAsync", Id);
+            if (!disposing)
+                dbConnection.HubConnectionBuilder.InvokeAsync<Response>("DisposeCommandAsync", Id);
 
             base.Dispose(disposing);
         }
@@ -132,7 +172,7 @@ namespace Simplic.SignalR.Ado.Net.Client
         private void Assert()
         {
             if (string.IsNullOrWhiteSpace(CommandText))
-                throw new Exception("CommandText must not be null or whitespace.");
+                throw new Exception("CommandText must not be null or white space.");
 
             if (DbConnection == null)
                 throw new Exception("DbConnection not set in SignalRDbCommand");
@@ -243,7 +283,7 @@ namespace Simplic.SignalR.Ado.Net.Client
 
         // TODO: Make this better
         protected override DbConnection DbConnection { get => dbConnection; set => dbConnection = value as SignalRDbConnection; }
-
+        internal SignalRDbConnection SignalRDbConnection => dbConnection;
         protected override DbParameterCollection DbParameterCollection { get; } = new SignalRDbParameterCollection();
 
         protected override DbTransaction DbTransaction { get; set; }

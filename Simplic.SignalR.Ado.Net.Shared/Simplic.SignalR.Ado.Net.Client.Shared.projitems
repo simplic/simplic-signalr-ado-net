@@ -13,6 +13,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Command\CommandParameter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection\OpenConnectionRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection\OpenConnectionResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReader\NextResultResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReader\OpenDataReaderResponse.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataReader\ReadResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)General\ResponseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)General\Response.cs" />
   </ItemGroup>

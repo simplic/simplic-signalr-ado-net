@@ -1,157 +1,207 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Simplic.SignalR.Ado.Net.Client
 {
-    public class SignalRDataReader : IDataReader
+    public class SignalRDataReader : DbDataReader
     {
-        public void Close()
+        #region Fields
+        private SignalRDbCommand command;
+        private SignalRDbConnection connection;
+        private Guid id;
+
+        private int depth;
+        private int fieldCount;
+        private bool hasRows;
+        private bool isClosed;
+        private int recordsAffected;
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initialize data reader
+        /// </summary>
+        /// <param name="openDataReader">Data reader instance</param>
+        /// <param name="command">Command instance</param>
+        internal SignalRDataReader(OpenDataReaderResponse openDataReader, SignalRDbCommand command)
+        {
+            this.command = command;
+            this.connection = command.SignalRDbConnection;
+
+            depth = openDataReader.Depth;
+            fieldCount = openDataReader.FieldCount;
+            isClosed = openDataReader.IsClosed;
+            recordsAffected = openDataReader.RecordsAffected;
+            hasRows = openDataReader.HasRows;
+
+            id = openDataReader.Id;
+        }
+        #endregion
+
+        public override bool NextResult()
+        {
+            var response = connection.HubConnectionBuilder.InvokeAsync<ResponseObject<NextResultResponse>>("NextResultAsync", id).Result;
+
+            // AssertResponse(response);
+
+            depth = response.Object.Depth;
+            fieldCount = response.Object.FieldCount;
+            isClosed = response.Object.IsClosed;
+            recordsAffected = response.Object.RecordsAffected;
+            hasRows = response.Object.HasRows;
+
+            return response.Object.Result;
+        }
+
+        public override async Task<bool> NextResultAsync(CancellationToken cancellationToken)
+        {
+            var response = await connection.HubConnectionBuilder.InvokeAsync<ResponseObject<NextResultResponse>>("NextResultAsync", id);
+
+            // AssertResponse(response);
+
+            depth = response.Object.Depth;
+            fieldCount = response.Object.FieldCount;
+            isClosed = response.Object.IsClosed;
+            recordsAffected = response.Object.RecordsAffected;
+            hasRows = response.Object.HasRows;
+
+            return response.Object.Result;
+        }
+
+        public override bool Read()
         {
             throw new NotImplementedException();
         }
 
-        public void Dispose()
+        public override bool GetBoolean(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public bool GetBoolean(int i)
+        public override byte GetByte(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public byte GetByte(int i)
+        public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length)
         {
             throw new NotImplementedException();
         }
 
-        public long GetBytes(int i, long fieldOffset, byte[] buffer, int bufferoffset, int length)
+        public override char GetChar(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public char GetChar(int i)
+        public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length)
         {
             throw new NotImplementedException();
         }
 
-        public long GetChars(int i, long fieldoffset, char[] buffer, int bufferoffset, int length)
+        public override string GetDataTypeName(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public IDataReader GetData(int i)
+        public override DateTime GetDateTime(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public string GetDataTypeName(int i)
+        public override decimal GetDecimal(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public DateTime GetDateTime(int i)
+        public override double GetDouble(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public decimal GetDecimal(int i)
+        public override IEnumerator GetEnumerator()
         {
             throw new NotImplementedException();
         }
 
-        public double GetDouble(int i)
+        public override Type GetFieldType(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public Type GetFieldType(int i)
+        public override float GetFloat(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public float GetFloat(int i)
+        public override Guid GetGuid(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public Guid GetGuid(int i)
+        public override short GetInt16(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public short GetInt16(int i)
+        public override int GetInt32(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public int GetInt32(int i)
+        public override long GetInt64(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public long GetInt64(int i)
+        public override string GetName(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public string GetName(int i)
+        public override int GetOrdinal(string name)
         {
             throw new NotImplementedException();
         }
 
-        public int GetOrdinal(string name)
+        public override string GetString(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public DataTable GetSchemaTable()
+        public override object GetValue(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public string GetString(int i)
+        public override int GetValues(object[] values)
         {
             throw new NotImplementedException();
         }
 
-        public object GetValue(int i)
+        public override bool IsDBNull(int ordinal)
         {
             throw new NotImplementedException();
         }
 
-        public int GetValues(object[] values)
-        {
-            throw new NotImplementedException();
-        }
+        public override object this[int ordinal] => throw new NotImplementedException();
 
-        public bool IsDBNull(int i)
-        {
-            throw new NotImplementedException();
-        }
+        public override object this[string name] => throw new NotImplementedException();
 
-        public bool NextResult()
-        {
-            throw new NotImplementedException();
-        }
+        public override int Depth => depth;
 
-        public bool Read()
-        {
-            throw new NotImplementedException();
-        }
+        public override int FieldCount => fieldCount;
 
-        public object this[int i] => throw new NotImplementedException();
+        public override bool HasRows => hasRows;
 
-        public object this[string name] => throw new NotImplementedException();
+        public override bool IsClosed => isClosed;
 
-        public int Depth => throw new NotImplementedException();
-
-        public bool IsClosed => throw new NotImplementedException();
-
-        public int RecordsAffected => throw new NotImplementedException();
-
-        public int FieldCount => throw new NotImplementedException();
+        public override int RecordsAffected => recordsAffected;
     }
 }

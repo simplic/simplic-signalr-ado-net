@@ -211,6 +211,27 @@ namespace Simplic.SignalR.Ado.Net.Server
                         if (model.TransactionId != null && model.TransactionId != Guid.Empty)
                             command.Transaction = connection.Transactions[model.TransactionId.Value];
 
+                        command.Parameters.Clear();
+                        if (model.Parameters != null)
+                        {
+                            foreach (var parameter in model.Parameters)
+                            {
+                                var dbParameter = command.CreateParameter();
+                                dbParameter.ParameterName = parameter.ParameterName;
+                                dbParameter.Value = parameter.Value?.ToString();
+                                dbParameter.DbType = parameter.DbType;
+                                dbParameter.Direction = parameter.Direction;
+                                dbParameter.Precision = parameter.Precision;
+                                dbParameter.Scale = parameter.Scale;
+                                dbParameter.Size = parameter.Size;
+                                dbParameter.SourceColumn = parameter.SourceColumn;
+                                dbParameter.SourceColumnNullMapping = parameter.SourceColumnNullMapping;
+                                dbParameter.SourceVersion = parameter.SourceVersion;
+
+                                command.Parameters.Add(dbParameter);
+                            }
+                        }
+
                         command.CommandText = model.CommandText;
                     }
                     else
@@ -330,6 +351,45 @@ namespace Simplic.SignalR.Ado.Net.Server
             catch (Exception ex)
             {
                 return new ResponseObject<object> { Exception = ex.Message, Success = false };
+            }
+        }
+
+        public async Task<ResponseObject<OpenDataReaderResponse>> ExecuteDbDataReaderAsync(Guid id)
+        {
+            try
+            {
+                if (TryGetConnection(out DbConnectionCache connection))
+                {
+                    if (TryGetCommand(connection, id, out DbCommand command))
+                    {
+                        QueryCounter++;
+
+                        var readerId = Guid.NewGuid();
+                        var reader = await command.ExecuteReaderAsync();
+                        
+                        var response = new OpenDataReaderResponse
+                        { 
+                            Id = readerId,
+                            Depth = reader.Depth,
+                            FieldCount = reader.FieldCount,
+                            IsClosed = reader.IsClosed,
+                            RecordsAffected = reader.RecordsAffected,
+                            HasRows = reader.HasRows
+                        };
+
+                        return GetSuccessReponse(response);
+                    }
+                    else
+                    {
+                        return GetCommandNotFoundReponse<OpenDataReaderResponse>(id);
+                    }
+                }
+                else
+                    return GetConnectionNotFoundReponse<OpenDataReaderResponse>();
+            }
+            catch (Exception ex)
+            {
+                return new ResponseObject<OpenDataReaderResponse> { Exception = ex.Message, Success = false };
             }
         }
 

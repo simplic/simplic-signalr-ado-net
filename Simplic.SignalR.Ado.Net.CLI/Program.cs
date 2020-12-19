@@ -1,5 +1,7 @@
-﻿using Simplic.SignalR.Ado.Net.Client;
+﻿using Dapper;
+using Simplic.SignalR.Ado.Net.Client;
 using System;
+using System.Diagnostics;
 
 namespace Simplic.SignalR.Ado.Net.CLI
 {
@@ -26,17 +28,36 @@ namespace Simplic.SignalR.Ado.Net.CLI
 
                     Console.WriteLine($"Affected {affectedData}; {command.CommandText}");
 
+                    // Add parameter
+                    var parameter = command.CreateParameter();
+                    parameter.ParameterName = "sampleParam";
+                    parameter.Value = "Max";
+                    parameter.DbType = System.Data.DbType.String;
+
+                    command.CommandText = "SELECT cast(:sampleParam as varchar) t";
+
+                    Console.WriteLine($"Output of: {command.CommandText}: {command.ExecuteScalar()}");
+
+                    Console.WriteLine("Make some dapper tests... (scalar)");
+                    Console.WriteLine($"Scalar: {connection.ExecuteScalar<int>("select :iv", new { iv = 1234 })}");
+
                     command.CommandText = "SELECT COUNT(*) FROM ESS_MS_Intern_Exception";
 
                     var integer = command.ExecuteScalar();
 
+                    command.CommandText = "select * from IT_Document";
+                    var reader = command.ExecuteReader();
+
                     Console.WriteLine($"User-Count {integer}; {command.CommandText}");
 
+                    var timer = Stopwatch.StartNew();
                     for (int k = 0; k < 100; k++)
                     {
                         command.CommandText = "select * from it_document";
                         command.ExecuteScalar();
                     }
+                    var ms = timer.ElapsedMilliseconds;
+                    Console.WriteLine($"Execution time {ms}ms");
 
                     while (true)
                     {
@@ -46,9 +67,10 @@ namespace Simplic.SignalR.Ado.Net.CLI
 
                         try
                         {
+                            timer = Stopwatch.StartNew();
                             var dt = command.ExecuteScalar();
-
-                            Console.WriteLine($"Result: {command.ExecuteScalar()}");
+                            ms = timer.ElapsedMilliseconds;
+                            Console.WriteLine($"Result: {command.ExecuteScalar()}. Execution time: {ms}ms");
                         }
                         catch (Exception ex)
                         {

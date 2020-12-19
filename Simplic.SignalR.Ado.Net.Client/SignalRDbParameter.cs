@@ -10,6 +10,11 @@ namespace Simplic.SignalR.Ado.Net.Client
     {
         private CommandParameter model;
 
+        public SignalRDbParameter()
+        {
+            model = new CommandParameter();
+        }
+
         public override void ResetDbType()
         {
             model = new CommandParameter();
@@ -23,6 +28,9 @@ namespace Simplic.SignalR.Ado.Net.Client
         public override string SourceColumn { get => model.SourceColumn; set => model.SourceColumn = value; }
         public override bool SourceColumnNullMapping { get => model.SourceColumnNullMapping; set => model.SourceColumnNullMapping = value; }
         public override object Value { get => model.Value; set => model.Value = value; }
+        public override byte Precision { get => model.Precision; set => model.Precision = value; }
+        public override byte Scale { get => model.Scale; set => model.Scale = value; }
+        public override DataRowVersion SourceVersion { get => model.SourceVersion; set => model.SourceVersion = value; }
         internal bool IsDirty { get; set; } = true;
         internal CommandParameter Model { get => model; }
     }
