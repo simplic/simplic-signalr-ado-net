@@ -10,13 +10,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Command\CommandModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Command\CommandParameter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection\OpenConnectionRequest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Connection\OpenConnectionResponse.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)General\ResponseObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)General\Response.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Command\" />
     <Folder Include="$(MSBuildThisFileDirectory)Connection\" />
     <Folder Include="$(MSBuildThisFileDirectory)General\" />
   </ItemGroup>

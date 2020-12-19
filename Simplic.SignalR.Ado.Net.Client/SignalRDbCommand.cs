@@ -142,12 +142,20 @@ namespace Simplic.SignalR.Ado.Net.Client
 
         private CommandModel GetModel()
         {
-            return new CommandModel
+            var model = new CommandModel
             {
                 CommandText = CommandText,
                 TransactionId = dbTransaction?.Id,
                 Id = Id
             };
+
+            model.Parameters.Clear();
+            foreach (var parameter in DbParameterCollection.OfType<SignalRDbParameter>())
+            {
+                model.Parameters.Add(parameter.Model);
+            }
+
+            return model;
         }
 
         private void CreateOrUpdate()
