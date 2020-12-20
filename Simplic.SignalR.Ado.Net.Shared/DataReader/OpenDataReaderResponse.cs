@@ -15,5 +15,8 @@ namespace Simplic.SignalR.Ado.Net
 
         public int FieldCount { get; set; }
         public bool HasRows { get; set; }
+        public int VisibleFieldCount { get; set; }
+        public byte[] Schema { get; set; }
+        public byte[] SchemaData { get; set; }
     }
 }

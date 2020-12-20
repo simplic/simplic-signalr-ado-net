@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,12 +17,14 @@ namespace Simplic.SignalR.Ado.Net.Client
         private SignalRDbCommand command;
         private SignalRDbConnection connection;
         private Guid id;
+        private DataTable table;
 
         private int depth;
         private int fieldCount;
         private bool hasRows;
         private bool isClosed;
         private int recordsAffected;
+        private int visibleFieldCount;
         #endregion
 
         #region Constructor
@@ -40,8 +43,21 @@ namespace Simplic.SignalR.Ado.Net.Client
             isClosed = openDataReader.IsClosed;
             recordsAffected = openDataReader.RecordsAffected;
             hasRows = openDataReader.HasRows;
+            visibleFieldCount = openDataReader.VisibleFieldCount;
 
             id = openDataReader.Id;
+
+            table = new DataTable();
+
+            using (var stream = new MemoryStream(openDataReader.Schema))
+            {
+                table.ReadXmlSchema(stream);
+            }
+
+            using (var stream = new MemoryStream(openDataReader.SchemaData))
+            {
+                table.ReadXml(stream);
+            }
         }
         #endregion
 
@@ -56,6 +72,7 @@ namespace Simplic.SignalR.Ado.Net.Client
             isClosed = response.Object.IsClosed;
             recordsAffected = response.Object.RecordsAffected;
             hasRows = response.Object.HasRows;
+            visibleFieldCount = response.Object.VisibleFieldCount;
 
             return response.Object.Result;
         }
@@ -71,6 +88,7 @@ namespace Simplic.SignalR.Ado.Net.Client
             isClosed = response.Object.IsClosed;
             recordsAffected = response.Object.RecordsAffected;
             hasRows = response.Object.HasRows;
+            visibleFieldCount = response.Object.VisibleFieldCount;
 
             return response.Object.Result;
         }
@@ -190,6 +208,11 @@ namespace Simplic.SignalR.Ado.Net.Client
             throw new NotImplementedException();
         }
 
+        public override DataTable GetSchemaTable()
+        {
+            return table;
+        }
+
         public override object this[int ordinal] => throw new NotImplementedException();
 
         public override object this[string name] => throw new NotImplementedException();
@@ -203,5 +226,6 @@ namespace Simplic.SignalR.Ado.Net.Client
         public override bool IsClosed => isClosed;
 
         public override int RecordsAffected => recordsAffected;
+        public override int VisibleFieldCount => visibleFieldCount;
     }
 }

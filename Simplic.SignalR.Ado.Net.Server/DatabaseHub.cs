@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -139,7 +140,7 @@ namespace Simplic.SignalR.Ado.Net.Server
                 command = null;
                 return false;
             }
-            
+
             if (dbConnectionCache.Commands.ContainsKey(id))
             {
                 command = dbConnectionCache.Commands[id];
@@ -366,16 +367,37 @@ namespace Simplic.SignalR.Ado.Net.Server
 
                         var readerId = Guid.NewGuid();
                         var reader = await command.ExecuteReaderAsync();
-                        
+
                         var response = new OpenDataReaderResponse
-                        { 
+                        {
                             Id = readerId,
                             Depth = reader.Depth,
                             FieldCount = reader.FieldCount,
                             IsClosed = reader.IsClosed,
                             RecordsAffected = reader.RecordsAffected,
-                            HasRows = reader.HasRows
+                            HasRows = reader.HasRows,
+                            VisibleFieldCount = reader.VisibleFieldCount
                         };
+
+                        // Do this all the time????
+                        var table = reader.GetSchemaTable();
+                        table.TableName = "SchemaTable";
+
+                        using (var stream = new MemoryStream())
+                        {
+                            table.WriteXmlSchema(stream);
+                            stream.Position = 0;
+
+                            response.Schema = stream.ToArray();
+                        }
+
+                        using (var stream = new MemoryStream())
+                        {
+                            table.WriteXml(stream);
+                            stream.Position = 0;
+
+                            response.SchemaData = stream.ToArray();
+                        }
 
                         return GetSuccessReponse(response);
                     }

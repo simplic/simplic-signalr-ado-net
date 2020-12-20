@@ -6,7 +6,7 @@ namespace Simplic.SignalR.Ado.Net
 {
     public class NextResultResponse
     {
-        public bool Result { get;set;; }
+        public bool Result { get; set; }
         public int Depth { get; set; }
 
         public bool IsClosed { get; set; }
@@ -15,5 +15,6 @@ namespace Simplic.SignalR.Ado.Net
 
         public int FieldCount { get; set; }
         public bool HasRows { get; set; }
+        public int VisibleFieldCount { get; set; }
     }
 }
