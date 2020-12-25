@@ -45,18 +45,31 @@ namespace Simplic.SignalR.Ado.Net.CLI
 
                     var integer = command.ExecuteScalar();
 
-                    command.CommandText = "select * from IT_Document";
-                    var reader = command.ExecuteReader();
-
                     Console.WriteLine($"User-Count {integer}; {command.CommandText}");
 
+
+                    Console.WriteLine($"Scalar: {connection.Query<bool>("select :iv", new { iv = 1234 })}");
+
                     var timer = Stopwatch.StartNew();
+                    command.CommandText = "select * from IT_Document";
+                    var reader = command.ExecuteReader();
+                    var ms = timer.ElapsedMilliseconds;
+
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        Console.WriteLine($"Field type: {i}/{reader.GetName(i)} => {reader.GetDataTypeName(i)}/{reader.GetFieldType(i)}");
+                    }
+
+                    Console.WriteLine($"Reader execution time: {ms}ms");
+
+
+                    timer = Stopwatch.StartNew();
                     for (int k = 0; k < 100; k++)
                     {
                         command.CommandText = "select * from it_document";
                         command.ExecuteScalar();
                     }
-                    var ms = timer.ElapsedMilliseconds;
+                    ms = timer.ElapsedMilliseconds;
                     Console.WriteLine($"Execution time {ms}ms");
 
                     while (true)
